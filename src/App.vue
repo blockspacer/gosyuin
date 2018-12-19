@@ -20,6 +20,7 @@ import Wallet from '@/components/Wallet.vue'; // @ is an alias to /src
 export default class App extends Vue {
   private title = 'Self made NEM wallet'
 }
+
 </script>
 <style lang="stylus">
 #app

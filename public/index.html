@@ -1,21 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
+    <title>Simple Map3</title>
+    <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- 追加 -->
-    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
-    <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
-    <!-- ここまで -->
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>gosyuin</title>
   </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but gosyuin doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
+  <body onload="getMyPlace()">
+    <div style="width: 80%; margin: 0 auto;">
+      <p><button onclick="getMyPlace()">現在位置を取得</button></p>
+      <div id="result"></div>
+      <div id ="judgePosition"></div>
+    </div>
+    <div id="map" style="width:80%;height:500px;margin: 0px auto;"></div>
+
+    <!-- google map api -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUZ2PDpR56eVNihoz59y7wSNJ95xHFynw"></script>
+    <script>
+
+    function getMyPlace() {
+      var output = document.getElementById("result");
+      if (!navigator.geolocation){//Geolocation apiがサポートされていない場合
+        output.innerHTML = "<p>Geolocationはあなたのブラウザーでサポートされておりません</p>";
+        return;
+      }
+      function success(position) {
+        var allowance = 0.001;
+        var latitude  = position.coords.latitude;//緯度
+        var longitude = position.coords.longitude;//経度
+        var judgePosition = document.getElementById("judgePosition");
+        output.innerHTML = '<p>緯度 ' + latitude + '° <br>経度 ' + longitude + '°</p>';
+        // 位置情報
+        var latlng = new google.maps.LatLng( latitude , longitude ) ;
+        // Google Mapsに書き出し
+        var map = new google.maps.Map( document.getElementById( 'map' ) , {
+            zoom: 15 ,// ズーム値
+            center: latlng ,// 中心座標
+        } ) ;
+        // マーカーの新規出力
+        new google.maps.Marker( {
+            map: map ,
+            position: latlng ,
+        } ) ;
+
+  // Mapをクリックする時の動作
+  map.addListener("click",function(e){
+    // コンソールで経度を表示
+    console.log("lat: " + e.latLng.lat());
+    var setLatitude = e.latLng.lat()
+    // コンソールで緯度を表示
+    console.log("lng: " + e.latLng.lng());
+    var setLongitude = e.latLng.lng()
+    // this.setCenter(e.latLng); // クリックする場所をMapの中心にする(画面の移動速度が速い)
+    this.panTo(e.latLng); //クリックする場所をMapの中心にする(画面の移動速度がゆっくり)
+
+        if(latitude < setLatitude + allowance
+          && latitude > setLatitude - allowance
+          && longitude < setLongitude + allowance
+          && longitude > setLongitude - allowance){
+          judgePosition.innerHTML = "<p>成功！</p>";
+        } else {
+          judgePosition.innerHTML = "<p>失敗！</p>";
+        }
+  });
+      };
+      function error() {
+        //エラーの場合
+        output.innerHTML = "座標位置を取得できません";
+      };
+      navigator.geolocation.getCurrentPosition(success, error);//成功と失敗を判断
+    }
+    </script>
+
   </body>
 </html>
